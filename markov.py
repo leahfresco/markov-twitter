@@ -37,6 +37,8 @@ def make_chains(text_string):
         # or we could replace the last three lines with:
         #    chains.setdefault(key, []).append(value)
 
+    # import pprint
+    # pprint.pprint(chains)
     return chains
 
 
@@ -44,6 +46,9 @@ def make_text(chains):
     """Takes dictionary of markov chains; returns random text."""
 
     key = choice(chains.keys())
+    while not key[0][0].isupper():
+        key = choice(chains.keys())
+
     words = [key[0], key[1]]
     while key in chains:
         # Keep looping until we have a key that isn't in the chains
@@ -51,7 +56,6 @@ def make_text(chains):
         #
         # Note that for long texts (like a full book), this might mean
         # it would run for a very long time.
-
         word = choice(chains[key])
         words.append(word)
         key = (key[1], word)
@@ -64,7 +68,13 @@ def make_text(chains):
         return random_text
     else:
         random_text = random_text[0:140]
+        try:
+            while random_text[-1] not in ".?!":
+                random_text = random_text[:-1]
+        except IndexError:
+            random_text = ""
 
+    print random_text
     return random_text
 
 
@@ -74,10 +84,10 @@ def tweet(chains):
     # Note: you must run `source secrets.sh` before running this file
     # to make sure these environmental variables are set.
     api = twitter.Api(
-    consumer_key=os.environ['TWITTER_CONSUMER_KEY'],
-    consumer_secret=os.environ['TWITTER_CONSUMER_SECRET'],
-    access_token_key=os.environ['TWITTER_ACCESS_TOKEN_KEY'],
-    access_token_secret=os.environ['TWITTER_ACCESS_TOKEN_SECRET'])
+        consumer_key=os.environ['TWITTER_CONSUMER_KEY'],
+        consumer_secret=os.environ['TWITTER_CONSUMER_SECRET'],
+        access_token_key=os.environ['TWITTER_ACCESS_TOKEN_KEY'],
+        access_token_secret=os.environ['TWITTER_ACCESS_TOKEN_SECRET'])
 
     # This will print info about credentials to make sure 
     # they're correct
@@ -98,7 +108,7 @@ text = open_and_read_file(filenames)
 
 # Get a Markov chain
 chains = make_chains(text)
-
+make_text(chains)
 # Your task is to write a new function tweet, that will take chains as input
 prompt = ''
 while prompt != "q":
